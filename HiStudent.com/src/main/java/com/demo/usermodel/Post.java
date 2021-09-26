@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.mysql.cj.jdbc.Blob;
+
 
 @Entity
 	@Table(name = "posts")
@@ -27,11 +29,13 @@ import javax.persistence.Table;
 
 	    @Column(columnDefinition="TEXT")
 	    private String content;
+	    
+//	    @Column(name="createdDate", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+//	    private Date createdDate;
 
-	    @Column(name="createdDate", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	    private Date createdDate;
 
-	    public Post() {
+
+		public Post() {
 	    }
 
 	    public Integer getId() {
@@ -58,13 +62,13 @@ import javax.persistence.Table;
 	        this.content = content;
 	    }
 
-	    public Date getCreatedDate() {
-	        return createdDate;
-	    }
+		@Override
+		public String toString() {
+			return "Post [id=" + id + ", user=" + user + ", content=" + content + "]";
+		}
+	    
+	    
 
-	    public void setCreatedDate(Date createdDate) {
-	        this.createdDate = createdDate;
-	    }
 	}
 
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -345,6 +346,28 @@ class HelloWorldController {
 		post.setUser(model);
 		prepo.save(post);
 		return post;
+	}
+	
+	@GetMapping("/getfriends/{id}")
+	
+	public List<StudentMate> getFriends(@PathVariable int id) throws NullPointerException {
+		
+       Optional<UserModel> model1 = repo.findById(id);
+	
+		
+		List<StudentMate> mate = mrepo.findByUser(model1);
+		
+		return mate;
+	}
+	
+	@GetMapping("/getpost/{id}")
+	public List<Post> getPost(@PathVariable int id) throws NullPointerException {
+		
+		Optional<UserModel> model1 = repo.findById(id);
+		
+		List<Post> posts = prepo.findByUser(model1);
+		
+		return posts;
 	}
 
 //	@PostMapping("/addmate/{id}")
