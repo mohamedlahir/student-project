@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,7 +48,7 @@ class HelloWorldController {
 
 	@Autowired
 	UserRepo repo;
-	
+
 	@Autowired
 	PostRepo prepo;
 
@@ -315,10 +314,10 @@ class HelloWorldController {
 	}
 
 	@PostMapping("/addmate/{id}")
-	public StudentMate addMate(@PathVariable int id, StudentMate mate,HttpServletRequest request) {
-		
+	public StudentMate addMate(@PathVariable int id, StudentMate mate, HttpServletRequest request) {
+
 		final String authorizationHeader = request.getHeader("Authorization");
-		
+
 		String username = null;
 		String jwt = null;
 		jwt = authorizationHeader.substring(7);
@@ -347,26 +346,25 @@ class HelloWorldController {
 		prepo.save(post);
 		return post;
 	}
-	
+
 	@GetMapping("/getfriends/{id}")
-	
+
 	public List<StudentMate> getFriends(@PathVariable int id) throws NullPointerException {
-		
-       Optional<UserModel> model1 = repo.findById(id);
-	
-		
+
+		Optional<UserModel> model1 = repo.findById(id);
+
 		List<StudentMate> mate = mrepo.findByUser(model1);
-		
+
 		return mate;
 	}
-	
+
 	@GetMapping("/getpost/{id}")
 	public List<Post> getPost(@PathVariable int id) throws NullPointerException {
-		
+
 		Optional<UserModel> model1 = repo.findById(id);
-		
+
 		List<Post> posts = prepo.findByUser(model1);
-		
+
 		return posts;
 	}
 
