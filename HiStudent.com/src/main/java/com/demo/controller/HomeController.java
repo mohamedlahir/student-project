@@ -1,12 +1,12 @@
 package com.demo.controller;
 
+import java.awt.PageAttributes.MediaType;
 import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -172,7 +172,7 @@ class HelloWorldController {
 		return mv;
 	}
 
-	@RequestMapping(path = "/save", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "/save")
 	@ResponseBody
 	public StudentAccount save(@RequestBody UserModel model, StudentAccount account) {
 		services.save1(model, account);
@@ -232,7 +232,7 @@ class HelloWorldController {
 
 	}
 
-	@RequestMapping(path = "/savecharge", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "/savecharge")
 	@ResponseBody
 	public ChargeModel savecharge(@RequestBody ChargeModel model) {
 		services.savecharge(model);
