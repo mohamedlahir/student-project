@@ -5,9 +5,12 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -19,7 +22,7 @@ import com.demo.studentaccount.StudentAccount;
 public class UserModel {
 
 	@Id	
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String username;
 	private String password;
@@ -35,23 +38,10 @@ public class UserModel {
 	
 	@OneToOne(cascade = {CascadeType.ALL})
 	private StudentAccount account;
+
 	
-	@OneToMany(cascade = {CascadeType.ALL},mappedBy = "mate")
-	private List<UserModel> mate = new ArrayList<UserModel>();
 
-	/**
-	 * @return the mate
-	 */
-	public List<UserModel> getMate() {
-		return mate;
-	}
 
-	/**
-	 * @param mate the mate to set
-	 */
-	public void setMate(List<UserModel> mate) {
-		this.mate = mate;
-	}
 
 	/**
 	 * @return the id
@@ -240,8 +230,9 @@ public class UserModel {
 		return "UserModel [id=" + id + ", username=" + username + ", password=" + password + ", first_name="
 				+ first_name + ", last_name=" + last_name + ", middle_name=" + middle_name + ", address=" + address
 				+ ", country=" + country + ", state=" + state + ", zipcode=" + zipcode + ", email=" + email + ", phone="
-				+ phone + ", account=" + account + ", mate=" + mate + "]";
+				+ phone + ", account=" + account + "]";
 	}
+
 }
 //{
 //	  

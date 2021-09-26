@@ -1,6 +1,5 @@
 package com.demo.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.demo.My.MyUserPrincipal;
 import com.demo.accountmodelrepo.AccountRepo;
 import com.demo.authenticationrequest.AuthenticationRequest;
 import com.demo.authenticationrequest.AuthenticationResponse;
@@ -35,10 +35,12 @@ import com.demo.jwtutil.JwtUtil;
 import com.demo.myuserdetailservice.MyUserDetailService;
 import com.demo.services.CrudServices;
 import com.demo.studentaccount.StudentAccount;
+import com.demo.usermodel.Post;
 import com.demo.usermodel.StudentMate;
 import com.demo.usermodel.UserModel;
 import com.demo.userrepo.ChargeRepo;
 import com.demo.userrepo.MateRepo;
+import com.demo.userrepo.PostRepo;
 import com.demo.userrepo.UserRepo;
 
 @RestController
@@ -46,6 +48,9 @@ class HelloWorldController {
 
 	@Autowired
 	UserRepo repo;
+	
+	@Autowired
+	PostRepo prepo;
 
 	@Autowired
 	AccountRepo arepo;
@@ -71,9 +76,27 @@ class HelloWorldController {
 	@Autowired
 	ChargerService chargeservice;
 
+	MyUserPrincipal userDto;
+
+	JwtUtil jwt;
+
 	@RequestMapping({ "/hello" })
 	public String firstPage() {
 		return "Hello World";
+	}
+
+	@GetMapping("/current-user")
+	public String getpay(HttpServletRequest request) {
+
+		final String authorizationHeader = request.getHeader("Authorization");
+
+		String username = null;
+		String jwt = null;
+
+		jwt = authorizationHeader.substring(7);
+		username = jwtTokenUtil.extractUsername(jwt);
+
+		return username;
 	}
 
 	@RequestMapping("/login")
@@ -151,8 +174,7 @@ class HelloWorldController {
 
 	@RequestMapping(path = "/save", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public StudentAccount save(@RequestBody UserModel model, StudentAccount account)
-	{
+	public StudentAccount save(@RequestBody UserModel model, StudentAccount account) {
 		services.save1(model, account);
 		return account;
 	}
@@ -219,7 +241,7 @@ class HelloWorldController {
 		int availableBalance = arepo.findById(id).get().getAmountBalance();
 		int value = crepo.findById(101).get().getAnnual_charge();
 		int chargedamount = availableBalance - value;
-		
+
 		saccount.setAccountid(saccount.getAccountid());
 		saccount.setAmountBalance(chargedamount);
 		saccount.setAmountCharged(value);
@@ -287,26 +309,43 @@ class HelloWorldController {
 	public String deleteAccountById1(@PathVariable("id") int id) throws UsernameNotFoundException {
 
 		arepo.deleteById(id);
-		
+
 		return " ID" + " :" + id + "is deleted";
 	}
-	
+
 	@PostMapping("/addmate/{id}")
-	public StudentMate addMate(@PathVariable int id,@RequestBody StudentMate mate, UserModel model) {
+	public StudentMate addMate(@PathVariable int id, StudentMate mate,HttpServletRequest request) {
 		
-		ArrayList<StudentMate> mate1 =new ArrayList<StudentMate>();  
+		final String authorizationHeader = request.getHeader("Authorization");
 		
-		String name = repo.findById(id).get().getFirst_name();
-//		mate.setId(mate.getId());
-		mate1.add(mate);
-		mate.setModel(model);
-		mate.setUserName(name);
+		String username = null;
+		String jwt = null;
+		jwt = authorizationHeader.substring(7);
+		username = jwtTokenUtil.extractUsername(jwt);
+		Optional<UserModel> model = repo.findById(id);
+		String friendName = model.get().getUsername();
+		mate.setFriendName(friendName);
+		mate.setUserName(username);
+		UserModel model1 = repo.findByUsername(friendName);
+		int id1 = model.get().getId();
+		mate.setId(id1);
+		mate.setUser(model1);
 		mrepo.save(mate);
 		return mate;
 	}
-	
-	
-	
+
+	@PostMapping("addpost")
+	public Post addPost(@RequestBody Post post, HttpServletRequest request) throws NullPointerException {
+		final String authorizationHeader = request.getHeader("Authorization");
+		String username = null;
+		String jwt = null;
+		jwt = authorizationHeader.substring(7);
+		username = jwtTokenUtil.extractUsername(jwt);
+		UserModel model = repo.findByUsername(username);
+		post.setUser(model);
+		prepo.save(post);
+		return post;
+	}
 
 //	@PostMapping("/addmate/{id}")
 //	public StudentMate addMate(@PathVariable int id, StudentMate mate, UserModel model) {

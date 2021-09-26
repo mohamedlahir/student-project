@@ -8,7 +8,6 @@ public class ChargeModel {
 
 	@Id
 	private int id;
-	;
 	private int basic_charge_amount;
 	private int annual_charge;
 	private int monthly_charge;
