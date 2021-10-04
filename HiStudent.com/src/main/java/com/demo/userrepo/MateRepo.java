@@ -10,6 +10,8 @@ import com.demo.usermodel.UserModel;
 
 public interface MateRepo extends JpaRepository<StudentMate, Integer> {
 
-	List<StudentMate> findByUser(Optional<UserModel> model1);
+	List <StudentMate> findByUser(String model1);
+	
+	List<StudentMate> findByUserName(Optional<UserModel> model1);
 
 }

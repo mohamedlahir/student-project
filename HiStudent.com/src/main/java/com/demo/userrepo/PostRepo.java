@@ -14,5 +14,5 @@ public interface PostRepo extends JpaRepository<Post,Integer> {
 
 	    List<Post> findAllByOrderByIdDesc();
 	    
-	    List<Post> findByUser(Optional<UserModel> model1);
+	    List<Post> findByUser(Optional<UserModel> model1);	    
 }

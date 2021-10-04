@@ -1,17 +1,10 @@
 package com.demo.usermodel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -38,10 +31,30 @@ public class UserModel {
 	
 	@OneToOne(cascade = {CascadeType.ALL})
 	private StudentAccount account;
-
+	
 	
 
+	/**
+	 * @return the account
+	 */
+	public StudentAccount getAccount() {
+		return account;
+	}
 
+	/**
+	 * @param account the account to set
+	 */
+	public void setAccount(StudentAccount account) {
+		this.account = account;
+	}
+
+	@Override
+	public String toString() {
+		return "UserModel [id=" + id + ", username=" + username + ", password=" + password + ", first_name="
+				+ first_name + ", last_name=" + last_name + ", middle_name=" + middle_name + ", address=" + address
+				+ ", country=" + country + ", state=" + state + ", zipcode=" + zipcode + ", email=" + email + ", phone="
+				+ phone + "]";
+	}
 
 	/**
 	 * @return the id
@@ -211,27 +224,23 @@ public class UserModel {
 		this.phone = phone;
 	}
 
-	/**
-	 * @return the account
-	 */
-	public StudentAccount getAccount() {
-		return account;
-	}
+//	/**
+//	 * @return the account
+//	 */
+//	public StudentAccount getAccount() {
+//		return account;
+//	}
+//
+//	/**
+//	 * @param account the account to set
+//	 */
+//	public void setAccount(StudentAccount account) {
+//		this.account = account;
+//	}
 
-	/**
-	 * @param account the account to set
-	 */
-	public void setAccount(StudentAccount account) {
-		this.account = account;
-	}
 
-	@Override
-	public String toString() {
-		return "UserModel [id=" + id + ", username=" + username + ", password=" + password + ", first_name="
-				+ first_name + ", last_name=" + last_name + ", middle_name=" + middle_name + ", address=" + address
-				+ ", country=" + country + ", state=" + state + ", zipcode=" + zipcode + ", email=" + email + ", phone="
-				+ phone + ", account=" + account + "]";
-	}
+
+
 
 }
 //{

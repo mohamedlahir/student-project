@@ -30,7 +30,7 @@ import javax.persistence.Table;
 	    private String content;
 	    
 //	    @Column(name="createdDate", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-//	    private Date createdDate;
+//	    private Date createdDate = new Date(1990,9,30);
 
 
 

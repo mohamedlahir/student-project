@@ -1,11 +1,11 @@
 package com.demo.usermodel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @javax.persistence.Entity
@@ -13,17 +13,18 @@ import javax.persistence.Table;
 public class StudentMate {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+//	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	private String userName;
 	private String friendName;
 
-//	@ManyToOne(fetch = FetchType.EAGER)
-//  @JoinColumn(name = "friend_id",referencedColumnName = "id")
+	@OneToMany(fetch = FetchType.EAGER)
+	//@JoinColumn(name = "friend_id", referencedColumnName = "id")
+	private List<UserModel> user = new ArrayList<UserModel>();
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "friend_id", referencedColumnName = "id") // @OneToMany not working
-	private UserModel user;
+//	@OneToMany(fetch = FetchType.EAGER)
+	// @JoinColumn(name = "friend_id", referencedColumnName = "id") // @OneToMany not working	 
+//	private List <UserModel> user = new ArrayList<>();
 
 	/**
 	 * @return the friendName
@@ -42,14 +43,14 @@ public class StudentMate {
 	/**
 	 * @return the user
 	 */
-	public UserModel getUser() {
+	public List<UserModel> getUser() {
 		return user;
 	}
 
 	/**
 	 * @param user the user to set
 	 */
-	public void setUser(UserModel user) {
+	public void setUser(List<UserModel> user) {
 		this.user = user;
 	}
 

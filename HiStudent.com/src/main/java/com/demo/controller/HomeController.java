@@ -1,10 +1,11 @@
 package com.demo.controller;
 
-import java.awt.PageAttributes.MediaType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,8 @@ import com.demo.usermodel.Post;
 import com.demo.usermodel.StudentMate;
 import com.demo.usermodel.UserModel;
 import com.demo.userrepo.ChargeRepo;
+import com.demo.userrepo.Dummy1Repo;
+import com.demo.userrepo.DummyRepo;
 import com.demo.userrepo.MateRepo;
 import com.demo.userrepo.PostRepo;
 import com.demo.userrepo.UserRepo;
@@ -60,6 +63,11 @@ class HelloWorldController {
 
 	@Autowired
 	MateRepo mrepo;
+	
+	@Autowired
+	DummyRepo drepo;
+	@Autowired
+	Dummy1Repo d1repo;
 
 	@Autowired
 	CrudServices services;
@@ -100,14 +108,16 @@ class HelloWorldController {
 	}
 
 	@RequestMapping("/login")
-	public ModelAndView login(@RequestBody UserModel model) {
+	public ModelAndView login(HttpServletRequest req, HttpServletResponse res) {
 
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName("login");
-		repo.save(model);
+		
+		String pasword = req.getParameter("password");
+		String username = req.getParameter("username");
 		return mv;
+		
 	}
-
 	@RequestMapping("/logout-success")
 	@ResponseBody
 	public String logout() {
@@ -120,6 +130,8 @@ class HelloWorldController {
 			throws Exception {
 
 		try {
+			
+			
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
 					authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 		} catch (BadCredentialsException e) {
@@ -321,7 +333,7 @@ class HelloWorldController {
 
 		return " ID" + " :" + id + "is deleted";
 	}
-
+	
 	@PostMapping("/addmate/{id}")
 	public StudentMate addMate(@PathVariable int id, StudentMate mate, HttpServletRequest request) {
 
@@ -330,19 +342,48 @@ class HelloWorldController {
 		String username = null;
 		String jwt = null;
 		jwt = authorizationHeader.substring(7);
-		username = jwtTokenUtil.extractUsername(jwt);
+		username = jwtTokenUtil.extractUsername(jwt); 
 		Optional<UserModel> model = repo.findById(id);
-		String friendName = model.get().getUsername();
-		mate.setFriendName(friendName);
+		String friendName = model.get().getUsername();mate.setFriendName(friendName);
 		mate.setUserName(username);
 		UserModel model1 = repo.findByUsername(friendName);
+		System.out.println(model1);
 		int id1 = model.get().getId();
 		mate.setId(id1);
-		mate.setUser(model1);
+		mate.getUser().add(model1);
 		mrepo.save(mate);
 		return mate;
+		
 	}
-
+	
+	@GetMapping(path="getmate/{id}")
+	public Optional<StudentMate> getMate(@PathVariable int id) {		
+		Optional<StudentMate> mate1 = mrepo.findById(id);		
+		return mate1;
+	
+	}
+	
+//	@PostMapping("/addmate/{id}")
+//	public StudentMate addMate(@PathVariable int id, StudentMate mate, HttpServletRequest request) {
+//
+//		final String authorizationHeader = request.getHeader("Authorization");
+//
+//		String username = null;
+//		String jwt = null;
+//		jwt = authorizationHeader.substring(7);
+//		username = jwtTokenUtil.extractUsername(jwt);
+//		Optional<UserModel> model = repo.findById(id);
+//		String friendName = model.get().getUsername();
+//		mate.setFriendName(friendName);
+//		mate.setUserName(username);
+//		UserModel model1 = repo.findByUsername(friendName);
+//		int id1 = model.get().getId();
+//		mate.setId(id1);
+//		mate.setUser(model1);
+//		mrepo.save(mate);
+//		return mate;
+//	}
+	
 	@PostMapping("addpost")
 	public Post addPost(@RequestBody Post post, HttpServletRequest request) throws NullPointerException {
 		final String authorizationHeader = request.getHeader("Authorization");
@@ -361,11 +402,23 @@ class HelloWorldController {
 	public List<StudentMate> getFriends(@PathVariable int id) throws NullPointerException {
 
 		Optional<UserModel> model1 = repo.findById(id);
+		
+		String name =  model1.get().getUsername();
 
-		List<StudentMate> mate = mrepo.findByUser(model1);
+		List<StudentMate> mate = mrepo.findByUserName(model1);
+		
+		for(StudentMate l : mate) {
+			
+			System.out.println(l);
+			
+		}
 
 		return mate;
 	}
+	
+	
+
+	
 
 	@GetMapping("/getpost/{id}")
 	public List<Post> getPost(@PathVariable int id) throws NullPointerException {
@@ -373,7 +426,9 @@ class HelloWorldController {
 		Optional<UserModel> model1 = repo.findById(id);
 
 		List<Post> posts = prepo.findByUser(model1);
-
+		
+		List <Post> post1 = new ArrayList<Post>();
+		
 		return posts;
 	}
 
@@ -386,6 +441,37 @@ class HelloWorldController {
 //       // int value = crepo.findById(101).get().getBasic_charge_amount();
 //		mrepo.save(mate);
 //		return mate;
+//	}
+	
+//	@PostMapping("savedummy")
+//	public Dummy1 savedummy(@RequestBody Dummy1 dummy) {
+//		
+//		d1repo.save(dummy);
+//		
+//		return dummy;
+//		
+//	}
+//	
+//	@PostMapping("adddummy")
+//	public Dummy2 adddummy(Dummy2 dummy, HttpServletRequest request) throws NullPointerException {
+//		final String authorizationHeader = request.getHeader("Authorization");
+//		String username = null;
+//		String jwt = null;
+//		jwt = authorizationHeader.substring(7);
+//		username = jwtTokenUtil.extractUsername(jwt);
+//		
+//		Dummy1 dummy1 = new Dummy1();
+//		
+//		dummy1.setId(10);
+//		dummy1.setName("lahir");
+//		
+//		dummy.setId(1);
+//		dummy.setName(username);
+//		dummy.getList().add(dummy1);
+//		
+//		drepo.save(dummy);
+//		d1repo.save(dummy1);
+//		return dummy;
 //	}
 
 }
