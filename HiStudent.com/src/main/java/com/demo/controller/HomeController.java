@@ -30,21 +30,21 @@ import com.demo.My.MyUserPrincipal;
 import com.demo.accountmodelrepo.AccountRepo;
 import com.demo.authenticationrequest.AuthenticationRequest;
 import com.demo.authenticationrequest.AuthenticationResponse;
-import com.demo.charge.ChargeModel;
-import com.demo.chargeservice.ChargerService;
 import com.demo.jwtutil.JwtUtil;
+import com.demo.models.ChargeModel;
+import com.demo.models.Parent_info;
+import com.demo.models.Post;
+import com.demo.models.StudentAccount;
+import com.demo.models.StudentMate;
+import com.demo.models.UserModel;
 import com.demo.myuserdetailservice.MyUserDetailService;
+import com.demo.repository.ChargeRepo;
+import com.demo.repository.MateRepo;
+import com.demo.repository.ParentRepo;
+import com.demo.repository.PostRepo;
+import com.demo.repository.UserRepo;
+import com.demo.services.ChargerService;
 import com.demo.services.CrudServices;
-import com.demo.studentaccount.StudentAccount;
-import com.demo.usermodel.Post;
-import com.demo.usermodel.StudentMate;
-import com.demo.usermodel.UserModel;
-import com.demo.userrepo.ChargeRepo;
-import com.demo.userrepo.Dummy1Repo;
-import com.demo.userrepo.DummyRepo;
-import com.demo.userrepo.MateRepo;
-import com.demo.userrepo.PostRepo;
-import com.demo.userrepo.UserRepo;
 
 @RestController
 class HelloWorldController {
@@ -63,11 +63,9 @@ class HelloWorldController {
 
 	@Autowired
 	MateRepo mrepo;
-	
+
 	@Autowired
-	DummyRepo drepo;
-	@Autowired
-	Dummy1Repo d1repo;
+	ParentRepo parentrepo;
 
 	@Autowired
 	CrudServices services;
@@ -87,6 +85,8 @@ class HelloWorldController {
 	MyUserPrincipal userDto;
 
 	JwtUtil jwt;
+
+//    Parent_info parent;
 
 	@RequestMapping({ "/hello" })
 	public String firstPage() {
@@ -112,12 +112,21 @@ class HelloWorldController {
 
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName("login");
-		
-		String pasword = req.getParameter("password");
-		String username = req.getParameter("username");
+
 		return mv;
-		
+
 	}
+
+	@RequestMapping("/about")
+	public ModelAndView home(HttpServletRequest req, HttpServletResponse res) {
+
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("about");
+
+		return mv;
+
+	}
+
 	@RequestMapping("/logout-success")
 	@ResponseBody
 	public String logout() {
@@ -130,8 +139,7 @@ class HelloWorldController {
 			throws Exception {
 
 		try {
-			
-			
+
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
 					authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 		} catch (BadCredentialsException e) {
@@ -175,6 +183,7 @@ class HelloWorldController {
 		model.setAddress(address);
 		model.setPhone(phone);
 		model.setEmail(email);
+		model.setParentAdded(false);
 		if (model.getUsername() == null) {
 			System.out.println("pls fill the form to save");
 		} else {
@@ -219,11 +228,13 @@ class HelloWorldController {
 	@ResponseBody
 	public Optional<UserModel> getById(@PathVariable int id) {
 
-		return repo.findById(id);
+		Optional<UserModel> model = repo.findById(id);
+
+		return model;
 	}
-	
-	///summa
-	
+
+	/// summa
+
 	@GetMapping("/getaccount/{id}")
 	@ResponseBody
 	public Optional<UserModel> getBy(@PathVariable int id) {
@@ -287,9 +298,6 @@ class HelloWorldController {
 		return saccount;
 	}
 
-//	String name = repo.findById(id1).get().getUsername();
-//	saccount.setStudentname(name);
-
 	@PutMapping("/basicCharge/{id}")
 	public StudentAccount basicCharge(@RequestBody StudentAccount saccount, @PathVariable int id) {
 		int availableBalance = arepo.findById(id).get().getAmountBalance();
@@ -328,12 +336,20 @@ class HelloWorldController {
 	@DeleteMapping("/deleteaccountbyid/{id}")
 	@ResponseBody
 	public String deleteAccountById1(@PathVariable("id") int id) throws UsernameNotFoundException {
+		String errorMsg = null;
+		try {
+			arepo.deleteById(id);
+		} catch (IllegalArgumentException e) {
+			errorMsg = e.toString();
+		}
+		if (errorMsg != null) {
 
-		arepo.deleteById(id);
-
-		return " ID" + " :" + id + "is deleted";
+			return " ID" + " :" + id + "is deleted";
+		} else {
+			return "Cannot delete the given ID";
+		}
 	}
-	
+
 	@PostMapping("/addmate/{id}")
 	public StudentMate addMate(@PathVariable int id, StudentMate mate, HttpServletRequest request) {
 
@@ -342,9 +358,10 @@ class HelloWorldController {
 		String username = null;
 		String jwt = null;
 		jwt = authorizationHeader.substring(7);
-		username = jwtTokenUtil.extractUsername(jwt); 
+		username = jwtTokenUtil.extractUsername(jwt);
 		Optional<UserModel> model = repo.findById(id);
-		String friendName = model.get().getUsername();mate.setFriendName(friendName);
+		String friendName = model.get().getUsername();
+		mate.setFriendName(friendName);
 		mate.setUserName(username);
 		UserModel model1 = repo.findByUsername(friendName);
 		System.out.println(model1);
@@ -353,47 +370,33 @@ class HelloWorldController {
 		mate.getUser().add(model1);
 		mrepo.save(mate);
 		return mate;
+
+	}
+
+	@GetMapping(path = "getmate/{id}")
+	public String getMate(@PathVariable int id) {
+		Optional<StudentMate> mate1 = mrepo.findById(id);
 		
+		String matef = mate1.get().getFriendName();
+		
+		return matef;
+
 	}
-	
-	@GetMapping(path="getmate/{id}")
-	public Optional<StudentMate> getMate(@PathVariable int id) {		
-		Optional<StudentMate> mate1 = mrepo.findById(id);		
-		return mate1;
-	
-	}
-	
-//	@PostMapping("/addmate/{id}")
-//	public StudentMate addMate(@PathVariable int id, StudentMate mate, HttpServletRequest request) {
-//
-//		final String authorizationHeader = request.getHeader("Authorization");
-//
-//		String username = null;
-//		String jwt = null;
-//		jwt = authorizationHeader.substring(7);
-//		username = jwtTokenUtil.extractUsername(jwt);
-//		Optional<UserModel> model = repo.findById(id);
-//		String friendName = model.get().getUsername();
-//		mate.setFriendName(friendName);
-//		mate.setUserName(username);
-//		UserModel model1 = repo.findByUsername(friendName);
-//		int id1 = model.get().getId();
-//		mate.setId(id1);
-//		mate.setUser(model1);
-//		mrepo.save(mate);
-//		return mate;
-//	}
-	
-	@PostMapping("addpost")
-	public Post addPost(@RequestBody Post post, HttpServletRequest request) throws NullPointerException {
+
+	@PostMapping("/addpost")
+	public List<Post> addPost(@RequestBody List<Post> post, HttpServletRequest request) throws NullPointerException {
 		final String authorizationHeader = request.getHeader("Authorization");
 		String username = null;
 		String jwt = null;
 		jwt = authorizationHeader.substring(7);
 		username = jwtTokenUtil.extractUsername(jwt);
 		UserModel model = repo.findByUsername(username);
-		post.setUser(model);
-		prepo.save(post);
+		prepo.save(post.get(0));
+		model.setPost(post);
+		
+//		post.setUser(model);
+		repo.save(model);
+		
 		return post;
 	}
 
@@ -402,76 +405,79 @@ class HelloWorldController {
 	public List<StudentMate> getFriends(@PathVariable int id) throws NullPointerException {
 
 		Optional<UserModel> model1 = repo.findById(id);
-		
-		String name =  model1.get().getUsername();
+
+		String name = model1.get().getUsername();
 
 		List<StudentMate> mate = mrepo.findByUserName(model1);
-		
-		for(StudentMate l : mate) {
-			
+
+		for (StudentMate l : mate) {
+
 			System.out.println(l);
-			
+
 		}
 
 		return mate;
 	}
-	
-	
-
-	
 
 	@GetMapping("/getpost/{id}")
-	public List<Post> getPost(@PathVariable int id) throws NullPointerException {
+	public String getPost(@PathVariable int id) throws NullPointerException {
 
 		Optional<UserModel> model1 = repo.findById(id);
 
 		List<Post> posts = prepo.findByUser(model1);
 		
-		List <Post> post1 = new ArrayList<Post>();
+		Optional<Post> q = prepo.findById(id);
 		
+		for(int i=0;i<posts.size();i++) {
+			
+			
+			
+		}
+
+		
+		return q.get().getContent().toString();
+	}
+
+	@GetMapping("/post/{id}")
+	public List<Post> getPost1(@PathVariable int id) throws NullPointerException {
+
+		Optional<UserModel> model1 = repo.findById(id);
+
+		List<Post> posts = prepo.findByUser(model1);
+
+		List<Post> post1 = new ArrayList<Post>();
+
 		return posts;
 	}
 
-//	@PostMapping("/addmate/{id}")
-//	public StudentMate addMate(@PathVariable int id, StudentMate mate, UserModel model) {
-//		String username = repo.findById(id).get().getUsername();
-//		int stuid = repo.findById(id).get().getId();
-//		mate.setUserName(username);
-//		mate.setId(stuid);
-//       // int value = crepo.findById(101).get().getBasic_charge_amount();
-//		mrepo.save(mate);
-//		return mate;
-//	}
-	
-//	@PostMapping("savedummy")
-//	public Dummy1 savedummy(@RequestBody Dummy1 dummy) {
-//		
-//		d1repo.save(dummy);
-//		
-//		return dummy;
-//		
-//	}
-//	
-//	@PostMapping("adddummy")
-//	public Dummy2 adddummy(Dummy2 dummy, HttpServletRequest request) throws NullPointerException {
-//		final String authorizationHeader = request.getHeader("Authorization");
-//		String username = null;
-//		String jwt = null;
-//		jwt = authorizationHeader.substring(7);
-//		username = jwtTokenUtil.extractUsername(jwt);
-//		
-//		Dummy1 dummy1 = new Dummy1();
-//		
-//		dummy1.setId(10);
-//		dummy1.setName("lahir");
-//		
-//		dummy.setId(1);
-//		dummy.setName(username);
-//		dummy.getList().add(dummy1);
-//		
-//		drepo.save(dummy);
-//		d1repo.save(dummy1);
-//		return dummy;
-//	}
+	@PostMapping("/addparent/{id}")
+	public String setParent(@PathVariable int id, @RequestBody Parent_info parent, UserModel model)
+			throws NullPointerException {
 
+		Optional<UserModel> ju = repo.findById(id);
+
+		UserModel k = ju.get();
+		if (k.isParentAdded() == false) {
+			k.setParent(parent);
+			k.setParentAdded(true);
+			repo.save(k);
+			return "Parents Added succesfully";
+		} else
+			return "Parents already added to the student";
+	}
+
+	@GetMapping("/getparent/{id}")
+	public Optional<Parent_info> getParent(@PathVariable int id) {
+		Optional<Parent_info> pin = parentrepo.findById(id);
+		return pin;
+	}
+	
+	@RequestMapping("/test")
+	public void testt(HttpServletRequest req,HttpServletResponse res) {
+		
+	String h= req.getHeader("Authorization");
+	
+		String s = h.substring(7);	
+	}	
 }
+//server.address=172.16.1.43

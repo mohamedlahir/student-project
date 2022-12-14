@@ -1,6 +1,7 @@
 package com.demo.My;
 
 import java.util.Collection;
+
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.demo.usermodel.UserModel;
+import com.demo.models.UserModel;
 
 public class MyUserPrincipal implements UserDetails{
 	
@@ -61,7 +62,5 @@ public class MyUserPrincipal implements UserDetails{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
-
 	
 }

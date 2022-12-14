@@ -2,18 +2,30 @@ package com.demo.services;
 
 import java.util.Optional;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.demo.accountmodelrepo.AccountRepo;
-import com.demo.charge.ChargeModel;
-import com.demo.studentaccount.StudentAccount;
-import com.demo.usermodel.UserModel;
-import com.demo.userrepo.ChargeRepo;
-import com.demo.userrepo.UserRepo;
+import com.demo.authenticationrequest.AuthenticationRequest;
+import com.demo.authenticationrequest.AuthenticationResponse;
+import com.demo.jwtutil.JwtUtil;
+import com.demo.models.ChargeModel;
+import com.demo.models.StudentAccount;
+import com.demo.models.UserModel;
+import com.demo.myuserdetailservice.MyUserDetailService;
+import com.demo.repository.ChargeRepo;
+import com.demo.repository.UserRepo;
 
 @Service
 public class CrudServices {
@@ -32,6 +44,15 @@ public class CrudServices {
 	StudentAccount saccount;
 
 	PasswordEncoder passwordencoder;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private JwtUtil jwtTokenUtil;
+
+	@Autowired
+	private MyUserDetailService userDetailsService;
 
 	public CrudServices(UserRepo repo) {
 		this.repo = repo;
@@ -62,9 +83,9 @@ public class CrudServices {
 		this.repo.save(model);
 		return account.getAccountid();
 	}
-	
+
 	public ChargeModel savecharge(ChargeModel model) {
-		
+
 		crepo.save(model);
 		return model;
 	}
@@ -82,10 +103,29 @@ public class CrudServices {
 		return crepo.findById(id);
 	}
 
-//	public int accountBalance( StudentAccount account ) {
-//	 	
-//		
-//		return account.setAmountBalance();
-//	}
+	//********************************************************************************************************************************************
+	
+	
+	
+	
+	public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest)
+			throws Exception {
+		
+		try {
+
+			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+					authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+		} catch (BadCredentialsException e) {
+			throw new Exception("Incorrect username or password", e);
+		}
+
+		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+
+		final String jwt = jwtTokenUtil.generateToken(userDetails);
+
+		return ResponseEntity.ok(new AuthenticationResponse(jwt));
+	}
+
+//***************************************************************************************************************************************
 
 }
